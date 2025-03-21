@@ -1,0 +1,29 @@
+{
+    "clientID": "PROSP3368",
+    "firstName": "Tom",
+    "lastName": "Kocinsky",
+    "referral_source": "advisor",
+    "id": "PROSP3368",
+    "fullName": "Tom Kocinsky",
+    "dateOfBirth": "1976/12/03",
+    "nationality": "US",
+    "contactDetails": {
+        "email": "",
+        "phone": ""
+    },
+    "status": "KYC data collected successfully",
+    "pep_status": false,
+    "risk_level": "",
+    "risk_score": 0,
+    "documents_provided": [],
+    "name_screening_result": "",
+    "investmentProfile": {
+        "riskProfile": "",
+        "investmentObjectives": "",
+        "investmentHorizon": ""
+    },
+    "declared_source_of_wealth": "",
+    "onboarding": [],
+    "compliance_flags": [],
+    "required_documents": []
+}

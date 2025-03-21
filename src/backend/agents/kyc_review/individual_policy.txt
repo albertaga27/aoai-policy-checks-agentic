@@ -1,0 +1,14 @@
+## Required Documentation for KYC (Individual/Natural Clients)
+
+| Type of Documentation                 | Document Examples                                                        | Collection Method                                |
+|----------------------------------------|-------------------------------------------------------------------------|-------------------------------------------------|
+| **Identity Verification**              | Passport, National ID, Swiss residence permit                           | Copy or electronic scan                         |
+| **Proof of Address**                   | Utility bills, bank statements, government-issued documents             | Copy or electronic scan                         |
+| **Source of Wealth (SoW)**             | Salary slips, employment contracts, tax returns, financial statements   | Copy or electronic scan (more detailed for high-risk clients) |
+| **Source of Funds (SoF)**              | Bank statements, salary slips, wire transfer confirmations              | Copy or electronic scan, transaction receipts   |
+| **Tax Residency & Compliance**         | CRS/FATCA self-declaration, Tax identification numbers (TIN)            | Standardized forms                              |
+| **PEP Status Declaration**             | Political exposure confirmation                                         | Standardized form                               |
+| **Sanction and Adverse Media Checks**  | Sanction screening reports (OFAC, EU, UN lists), adverse media searches | Automated screening reports (internal)          |
+| **Client Profile Information**         | KYC questionnaire (occupation, expected activity, account purpose)      | Standardized KYC forms                          |
+| **Source of Funds (SoF)**              | Bank statements, payment confirmations, salary documentation            | Copy or electronic confirmation                 |
+| **Tax Compliance Documentation**       | Tax returns, tax advisor confirmations                                  | Copies or self-declarations                     |

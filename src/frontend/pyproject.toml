@@ -1,0 +1,11 @@
+[project]
+name = "moneta-kyc-frontend"
+version = "0.1.0"
+description = "KYC Review - SoW Checks Agentic - Frontend"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "streamlit ~=1.41.1",
+    "requests ~=2.32.3",
+    "python-dotenv ~=1.0.1",
+]

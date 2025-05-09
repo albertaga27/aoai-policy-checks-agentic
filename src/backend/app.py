@@ -6,12 +6,18 @@ This module initializes a FastAPI application that exposes endpoints for...
 import json
 import logging
 import os
+from uuid import uuid4
+import base64
 from fastapi import FastAPI, Body, HTTPException
 from fastapi.responses import JSONResponse
 
 from patterns.kyc_team import KYCTeamOrchestrator
+from patterns.mortgage_orchestrator import Orchestrator, RequestPayload, RequestData, Document, _download_blob_to_bytes
 
-from azure.identity import DefaultAzureCredential  
+from typing import Any, Dict
+from pydantic import BaseModel, Field
+from azure.identity import DefaultAzureCredential
+from azure.storage.blob import BlobClient   
 
 from utils.util import load_dotenv_from_azd, set_up_tracing, set_up_metrics, set_up_logging
 
@@ -29,7 +35,7 @@ logging.getLogger('azure.core.pipeline.policies.http_logging_policy').setLevel(l
 logging.getLogger('azure.monitor.opentelemetry.exporter.export').setLevel(logging.WARNING)
 
 
-orchestrator = KYCTeamOrchestrator()
+kyc_orchestrator = KYCTeamOrchestrator()
 
 app = FastAPI()
 
@@ -59,7 +65,7 @@ async def run_kyc_checks(request_body: dict = Body(...)):
 
     try:
         reply_items = []
-        async for item in orchestrator.process_conversation(user_id, conversation_messages):
+        async for item in kyc_orchestrator.process_conversation(user_id, conversation_messages):
             reply_items.append(item)
 
         return JSONResponse(
@@ -101,3 +107,55 @@ def get_all_clients(request: dict = Body(...)):
     except Exception as e:
         logging.error(f"Error in load_all_clients: {str(e)}")
         return json.dumps({"error": f"load_all_clients failed with error: {str(e)}"})
+    
+
+
+
+mortgage_orchestrator = Orchestrator()
+
+@app.post("/mortgage_requests")
+async def new_request(payload: RequestPayload):
+    # 0. Resolve / create a request ID
+    request_id = payload.request_id
+
+    try:
+        # 1. Retrieve every blob *now* so we have them locally for the first agent
+        docs_bytes: Dict[str, bytes] = {
+            fname: _download_blob_to_bytes(url)
+            for fname, url in payload.documents.items()
+        }
+
+        # 2. Persist a *RECEIVED* row in Cosmos DB
+        #    (the orchestrator takes care of container/database creation)
+        mortgage_orchestrator.create_request(
+            user_id=payload.user_id,
+            form_data=payload.request_data.model_dump(),
+            documents=payload.documents,
+            request_id=request_id,        
+        )
+
+        # 3. Kick off the heavy ingestion pipeline in a background thread
+        #    We pass the raw bytes so the classifier agent can work immediately.
+        await mortgage_orchestrator.run_ingestion_pipeline(
+            request_id=request_id,
+            user_id= payload.user_id
+        )
+
+        # ───────── alternative patterns ─────────
+        # • FastAPI's BackgroundTasks
+        # • push (user_id, request_id) on Service Bus and let an Azure Function
+        #   do mortgage_orchestrator.run_ingestion_pipeline
+
+        # 4. Tell the caller we have the dossier
+        return {"request_id": request_id, "status": "RECEIVED"}
+    
+    except Exception as e:  
+        logging.error(f"Error in the mortgage agentic workflow: {e}")  
+        raise HTTPException(status_code=400, detail=str(e))  
+
+#TODO
+#``POST <BACKEND_URL>/prospects`` returning
+#    ``[{ "request_id": "…", "full_name": "…", "status": "…", "created": "…" }, …]``
+
+#TODO
+# ``POST <BACKEND_URL>/mortgage_requests/{request_id}", params={"user_id": user_id}
